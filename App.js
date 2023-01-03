@@ -16,5 +16,6 @@ app.set("views", "views");
 app.use("/admin", adminRoutes.router);
 app.use(shopRoutes);
 
+//create server
 app.use(errorController.get404Page);
 app.listen(3000);
