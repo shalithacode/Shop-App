@@ -1,9 +1,1 @@
-[
-  {
-    "id": "0.01",
-    "title": "Book",
-    "imgUrl": "https://media.gettyimages.com/id/173015527/photo/a-single-red-book-on-a-white-surface.jpg?s=612x612&w=gi&k=20&c=syZlgwrt3AEG2xdvaCbaEQ8k1F1OoJkW22Xh_pTNAzA=",
-    "description": "Good book",
-    "price": "15.01"
-  }
-]
+[{"id":"0.01","title":"Book","imgUrl":"https://media.gettyimages.com/id/173015527/photo/a-single-red-book-on-a-white-surface.jpg?s=612x612&w=gi&k=20&c=syZlgwrt3AEG2xdvaCbaEQ8k1F1OoJkW22Xh_pTNAzA=","description":"Good book. recommend to buy it.","price":"15.01"}]
