@@ -11,8 +11,15 @@ module.exports = class Product {
 
   save() {
     const db = getDb();
-    db.collection("products")
-      .insertOne(this)
+    let dbOp;
+    if (this.id) {
+      dbOp = db
+        .collection("products")
+        .updateOne({ _id: new mongodb.ObjectId(this.id) }, { $set: this });
+    } else {
+      dbOp = db.collection("products").insertOne(this);
+    }
+    dbOp
       .then(() => {
         console.log("prodcut was added");
         return;
@@ -22,7 +29,18 @@ module.exports = class Product {
       });
   }
 
-  static deleteById(id) {}
+  static deleteById(id) {
+    const db = getDb();
+    return db
+      .collection("products")
+      .deleteOne({ _id: new mongodb.ObjectId(id) })
+      .then((product) => {
+        console.log("Deleted");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
 
   static fetchAll() {
     const db = getDb();
@@ -31,7 +49,6 @@ module.exports = class Product {
       .find()
       .toArray()
       .then((products) => {
-        console.log(products);
         return products;
       })
       .catch((err) => {
@@ -45,7 +62,6 @@ module.exports = class Product {
       .find({ _id: new mongodb.ObjectId(id) })
       .next()
       .then((product) => {
-        console.log(product);
         return product;
       })
       .catch((err) => {
