@@ -48,7 +48,6 @@ class user {
       .find({ _id: { $in: productIds } })
       .toArray()
       .then((products) => {
-        // Use the plural "products" variable
         return products.map((p) => {
           const cartItem = this.cart.items.find(
             (item) => item.productId.toString() === p._id.toString()
@@ -78,6 +77,44 @@ class user {
         return result;
       })
       .catch((e) => console.log(e));
+  }
+
+  addOrder() {
+    const db = getDb();
+    return this.getCart()
+      .then((products) => {
+        const order = {
+          items: products,
+          user: {
+            _id: new mongodb.ObjectId(this._id),
+            name: this.name,
+          },
+        };
+        return db.collection("orders").insertOne(order);
+      })
+      .then((result) => {
+        this.cart = { items: [] };
+        return db
+          .collection("users")
+          .updateOne(
+            { _id: new mongodb.ObjectId(this._id) },
+            { $set: { cart: { items: [] } } }
+          );
+      });
+  }
+
+  getOrders() {
+    const db = getDb();
+    return db
+      .collection("orders")
+      .find({ "user._id": new mongodb.ObjectId(this._id) })
+      .toArray()
+      .then((orders) => {
+        return orders;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   static findById(id) {
