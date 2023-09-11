@@ -1,13 +1,12 @@
 const path = require("path");
-
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 
 const errorController = require("./controllers/error");
-const mongoConect = require("./util/database").mongoConnect;
+const mongoose = require("mongoose");
+const User = require("./models/user");
 const app = express();
-
-const Users = require("./models/user");
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -19,9 +18,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use((req, res, next) => {
-  Users.findById("64f7814309cb5eed0e5b0251")
+  User.findById("64fb798abf72e3a9c26ab6e2")
     .then((user) => {
-      req.user = new Users(user.name, user.email, user.cart, user._id);
+      req.user = user;
       next();
     })
     .catch((e) => console.log(e));
@@ -32,6 +31,12 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-mongoConect(() => {
-  app.listen(3000);
-});
+mongoose
+  .connect(
+    `mongodb+srv://${process.env.MONOGDB_USER}:${process.env.MONOGDB_PASSWORD}@node-cluster.dkal6pa.mongodb.net/shop?retryWrites=true&w=majority`
+  )
+  .then((result) => {
+    console.log("DB conneccted");
+    app.listen(3000);
+  })
+  .catch((e) => console.log(e));
