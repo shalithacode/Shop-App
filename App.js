@@ -13,6 +13,7 @@ app.set("views", "views");
 
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
+const authRoutes = require("./routes/auth");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -21,6 +22,7 @@ app.use((req, res, next) => {
   User.findById("64fb798abf72e3a9c26ab6e2")
     .then((user) => {
       req.user = user;
+      req.isLoggedIn = req.get("Cookie").trim().split("=")[1];
       next();
     })
     .catch((e) => console.log(e));
@@ -28,6 +30,7 @@ app.use((req, res, next) => {
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
+app.use(authRoutes);
 
 app.use(errorController.get404);
 
