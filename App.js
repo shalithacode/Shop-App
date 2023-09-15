@@ -5,27 +5,42 @@ const bodyParser = require("body-parser");
 
 const errorController = require("./controllers/error");
 const mongoose = require("mongoose");
-const User = require("./models/user");
+const session = require("express-session");
+const MongodbStore = require("connect-mongodb-session")(session);
+
+const MONGODB_URI = `mongodb+srv://${process.env.MONOGDB_USER}:${process.env.MONOGDB_PASSWORD}@node-cluster.dkal6pa.mongodb.net/shop?retryWrites=true&w=majority`;
+
 const app = express();
+const store = new MongodbStore({ uri: MONGODB_URI, collection: "sessions" });
+
+const User = require("./models/user");
+const adminRoutes = require("./routes/admin");
+const shopRoutes = require("./routes/shop");
+const authRoutes = require("./routes/auth");
 
 app.set("view engine", "ejs");
 app.set("views", "views");
 
-const adminRoutes = require("./routes/admin");
-const shopRoutes = require("./routes/shop");
-const authRoutes = require("./routes/auth");
+app.use(
+  session({
+    secret: "my-secret",
+    resave: false,
+    saveUninitialized: false,
+    store: store,
+  })
+);
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use((req, res, next) => {
-  User.findById("64fb798abf72e3a9c26ab6e2")
+  const email = req.session.email;
+  User.findOne({ email: email })
     .then((user) => {
       req.user = user;
-      req.isLoggedIn = req.get("Cookie").trim().split("=")[1];
       next();
     })
-    .catch((e) => console.log(e));
+    .catch((e) => console.log("User not found"));
 });
 
 app.use("/admin", adminRoutes);
@@ -35,9 +50,7 @@ app.use(authRoutes);
 app.use(errorController.get404);
 
 mongoose
-  .connect(
-    `mongodb+srv://${process.env.MONOGDB_USER}:${process.env.MONOGDB_PASSWORD}@node-cluster.dkal6pa.mongodb.net/shop?retryWrites=true&w=majority`
-  )
+  .connect(MONGODB_URI)
   .then((result) => {
     console.log("DB conneccted");
     app.listen(3000);
