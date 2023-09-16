@@ -12,14 +12,29 @@ exports.getLogin = (req, res, next) => {
   }
 };
 exports.postLogin = (req, res, next) => {
-  User.findById("64fb798abf72e3a9c26ab6e2")
-    .then((user) => {
-      req.session.user = user;
-      req.session.isLoggedIn = true;
-      req.session.save((err) => {
-        console.log(err);
-        res.redirect("/");
-      });
+  const email = req.body.email;
+  const password = req.body.password;
+
+  User.findOne({ email: email })
+    .then((userDoc) => {
+      if (!userDoc) return res.redirect("/login");
+      bcrypt
+        .compare(password, userDoc.password)
+        .then((isMatch) => {
+          if (isMatch) {
+            req.session.user = userDoc;
+            req.session.isLoggedIn = true;
+            return req.session.save((err) => {
+              console.log(err);
+              res.redirect("/");
+            });
+          }
+          res.redirect("/login");
+        })
+        .catch((err) => {
+          console.log(err);
+          return res.redirect("/login");
+        });
     })
     .catch((e) => console.log("User not found"));
 };
