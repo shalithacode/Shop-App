@@ -7,6 +7,7 @@ const errorController = require("./controllers/error");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const MongodbStore = require("connect-mongodb-session")(session);
+const flash = require("connect-flash");
 
 const MONGODB_URI = `mongodb+srv://${process.env.MONOGDB_USER}:${process.env.MONOGDB_PASSWORD}@node-cluster.dkal6pa.mongodb.net/shop?retryWrites=true&w=majority`;
 
@@ -29,6 +30,7 @@ app.use(
     store: store,
   })
 );
+app.use(flash());
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -44,6 +46,10 @@ app.use((req, res, next) => {
       next();
     })
     .catch((e) => console.log(e));
+});
+app.use((req, res, next) => {
+  res.locals.isAutheticated = req.session.isLoggedIn;
+  next();
 });
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
